@@ -1,7 +1,7 @@
 # tipsom
-ACSON - Access Constrained Simple Object Notation
+TIPSOM - Triggered Incrementally Parsed Simple Object Mapping
 
-Why is ACSON needed?
+Why is TIPSOM needed?
 
   When you switch from a Relational DB to a Document Based NoSQL DB, there are two significant changes in the data that is read per record.  These two changes are: a significant increase in the size of the data per record, and the data is no longer a single list of fields, but is a DOM (Document Object Model) of multiple records, of various types and quantities.  Quite often the Text DOM is represented in JSON, and the JSON has to be parsed as a unit, which could take a significant amount of time and memory as the parsing keeps generating more and more JSON objects, and if you then bind all these JSON objects to domain objects (generating a Domain Object Graph or DOG) even more time and memory is used.
 
@@ -9,9 +9,9 @@ Why is ACSON needed?
 
   IMO, the fundamental problem is having to interact with the JSON DOM as a unit.  So, a potential solution is to convert the single large JSON DOM into a selectively managed set of smaller Text DOMs.  The question then is what is the optimal scope/size of these smaller Text DOMs?
 
-  With ACSON, the plan is to treat every attribute of every Text DOM object as a separately parsable entity.  These entities can be "Lazy Parsed" on demand as sections are actually requested (and extending the DOG as needed), and to be able to quickly stitch together all the parsed and unparsed data back into a single Text DOM.
+  With TIPSOM, the plan is to treat every attribute of every Text DOM object as a separately parsable entity.  These entities can be "Lazy Parsed" on demand as sections are actually requested (and extending the DOG as needed), and to be able to quickly stitch together all the parsed and unparsed data back into a single Text DOM.
 
-The goals of ACSON (a modified form of JSON) is to have the simplicity of JSON but to support easy of semi-parsing (very simple and fast metadata parsing and deferred data parsing) which will support very rapid hierarchical access (parsing only enough to satisfy current request).  The semi-parsing that occurs as part of the selective extraction, facilitates quick generation by directly utilizing the unparsed data with simple and quick rendering of the parsed metadata.  An additional goal was that it be completely human readable (which means that there should be no "invisible" characters EXCEPT spaces).
+The goals of TIPSOM (a modified form of JSON) is to solve the high costs of parsing and generating a Text (JSON) DOM when mapping largish TEXT DOMs to and from persistence stores (whether they be NoSQL DB or simply CLOB/BLOB(s) in RDBs).  TIPSOM should have the simplicity of JSON but to support ease of semi-parsing (very simple and fast metadata parsing and deferred data parsing) which will support very rapid hierarchical access (parsing only enough to satisfy current request).  The semi-parsing that occurs as part of the selective extraction, facilitates quick generation by directly utilizing the unparsed data with simple and quick rendering of the parsed metadata.  An additional goal was that it be completely human readable (which means that there should be no "invisible" characters EXCEPT spaces).
 
 When reading the info below, please keep in mind the cleverness of UTF-8: all 7-bit ASCII character byte values (including line feeds) can NOT exist as part of a multibyte UTF-8 Rune!
 
@@ -21,14 +21,13 @@ To achieve the goals above, the following are some of the plans and limitations 
 
   1) There is an implied "root" "object" that starts the "file".
 
-  2) Each line of the "file" is of one of the following types (the first two line types are identified by the single-quoted starting character):
-      '#' - Comment line,
+  2) Each line of the "file" is either a Member "Value" or an Attribute "Name" & "Value", which can be determined by checking the first character of the line (after removing leading and trailing spaces).  A Member "Values" line starts with a colon (':') whereas Attribute "Name" & "Value" lines must start with a letter per the Attribute "Names" rule below.  The parsing of a file line is a single test:
       ':' - Member "Value" (Arrays or MLSs - see below) "prefix", or
       Attribute "Name" & "Value" (Objects)
 
-  3) Like JSON, ACSON is a "Name" - "Value" paired format where all "Values" are of one of the following forms: "Objects", "Arrays", and limited "primitives".
+  3) Like JSON, TIPSOM is a "Name" - "Value" paired format where all "Values" are of one of the following forms: "Objects", "Arrays", and limited "primitives".
 
-  4) The ACSON primitives include all the JSON primitives (with three variations for strings) plus some temporal types:
+  4) The TIPSOM primitives include all the JSON primitives (with three variations for strings) plus some temporal types:
       Strings - three variations:
         Multi-Line String (MLS),
         Single-Line Strings - two variations:
@@ -45,7 +44,7 @@ To achieve the goals above, the following are some of the plans and limitations 
 
   5) Since "Strings" could violate the "rules" for parsing, every string added will be evaluated and stored in a combination of the three string variations.  Note: the multi-line string form's subsequent lines consist of the other two forms (in the Array Member "Value" form).  Note: Trailing white space for each line is removed!
 
-  6) Since the hierarchical nature of the ACSON (and JSON for that matter) is created by the use of attribute values that are Objects, Arrays, and MLSs, the key to rapid parsing (and deferring the majority of the detailed parsing) is the easy determination of the length (for skipping parsing) of the Objects, Arrays, and MLSs.  To that end, each "Value" contains a metadata structure that indicates (implicitly or directly) how many additional lines make up the "body" of the Object, Array, or MLS.
+  6) Since the hierarchical nature of the TIPSOM (and JSON for that matter) is created by the use of attribute values that are Objects, Arrays, and MLSs, the key to rapid parsing (and deferring the majority of the detailed parsing) is the easy determination of the length (for skipping parsing) of the Objects, Arrays, and MLSs (Note: BSON also uses this concept to allow faster peer lookups).  To that end, each "Value" contains a metadata structure that indicates (implicitly or directly) how many additional lines make up the "body" of the Object, Array, or MLS.
 
   7) All Attribute "Names" will be legitimate Java/Go (and most other languages) variable names, BUT be limited to 7-bit ASCII.  This means that they must start with a Letter and then be optionally followed by: letters, digits, and underscores.  Attribute "Names" are terminated by the "Value's" "prefix".
 
