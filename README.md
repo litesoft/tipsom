@@ -57,19 +57,19 @@ To achieve the goals above, the following are some of the plans and limitations 
       2) For multi-line values (Objects, Arrays, & MLSs), an integer indicating the number of additional lines.
 
   9) Strategy dispatch characters for the various "Value" "forms" (the character is the single letter before the '-', alphabetically ordered for the letters):
-    { - Objects,
-    [ - Arrays,
-    " - JESs,
-    ' - UASs,
-    b - Booleans,
-    c - CalendarDate,
-    d - Duration,
-    i - Instance,
-    n - Numbers,
-    s - MLSs, and
-    t - Time
+    { - Objects . . . . (additional line count follows),
+    [ - Arrays  . . . . (additional line count follows),
+    " - JESs  . . . . . (text follows),
+    ' - UASs  . . . . . (text follows),
+    b - Booleans  . . . ('T' or 'F' follows),
+    c - CalendarDates . (temporal CalendarDate formatted text follows),
+    d - Durations . . . (temporal Duration formatted text follows),
+    i - Instances . . . (temporal Instance formatted text follows),
+    n - Numbers . . . . (numeric follows, need to reseach the supported forms),
+    s - MLSs  . . . . . (additional line count follows), and
+    t - Times . . . . . (temporal Time formatted text follows)
 
-  10) The "Zero" value (see Go re null/nil and empty strings) for primitives will NOT be stored with the exception of the empty string in a MLS.
+  10) The "Zero" value (see Go re null/nil and empty strings) for primitives will NOT be stored with the exception of the empty string in a MLS.  In addition, null/nil will NOT be supported for Array Member "Values", but the "Zero" value when NOT null/nil will be! 
 
 Note - temporal formats ("[...]" indicates that whatever is between the '[' and the ']' is optional, "{...}" indicates a group where one of the options must be used, and "|" is an option separator):
 
