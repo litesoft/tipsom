@@ -1,0 +1,15 @@
+firstName:'John
+lastName:'Smith
+age:n25
+address:{4
+streetAddress:'21 2nd Street
+city:'New York
+state:'NY
+postalCode:'10021
+phoneNumbers:[6
+:{2
+type:'home
+number:'212 555-1234
+:{2
+type:'fax
+number:'646 555-4567
